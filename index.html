@@ -7,17 +7,26 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; margin:0; padding:10px; text-align: center; }
-        .header { background: #1a5f7a; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 400px; margin: auto; }
-        .btn { background: white; padding: 25px 10px; border-radius: 10px; font-weight: bold; border: 1px solid #ddd; cursor: pointer; }
-        #secret-zone, #chat-room-container { display: none; background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        #chat-room { height: 350px; overflow-y: auto; background: #e5ddd5; padding: 10px; display: flex; flex-direction: column; border-radius: 10px; margin-bottom: 10px; text-align: left; }
-        .msg { padding: 8px 12px; border-radius: 10px; margin-bottom: 5px; max-width: 75%; font-size: 14px; word-wrap: break-word; }
-        .sent { background: #dcf8c6; align-self: flex-end; }
-        .received { background: white; align-self: flex-start; }
-        input { width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        button { background: #1a5f7a; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e6ebee; margin:0; padding:10px; }
+        #main-portal, #secret-zone, #chat-room-container { max-width: 450px; margin: auto; }
+        .header { background: #1a5f7a; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { background: white; padding: 20px 10px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        #chat-room-container { display: none; background: #7195b1; height: 90vh; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        #chat-room { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+        
+        .msg { padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; max-width: 80%; font-size: 15px; line-height: 1.4; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .sent { background: #efffde; align-self: flex-end; border-bottom-right-radius: 2px; color: #000; }
+        .received { background: #ffffff; align-self: flex-start; border-bottom-left-radius: 2px; color: #000; }
+        
+        .sender-name { font-size: 11px; font-weight: bold; margin-bottom: 3px; display: block; color: #3498db; }
+        
+        .input-area { background: white; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        input[type="text"] { flex: 1; border: none; padding: 10px; border-radius: 20px; background: #f0f2f5; outline: none; }
+        .send-btn { background: #1a5f7a; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; }
+        
+        #secret-zone { display: none; background: white; padding: 30px; border-radius: 15px; text-align: center; margin-top: 50px; }
     </style>
 </head>
 <body>
@@ -34,14 +43,16 @@
 
 <div id="secret-zone">
     <h3>Verification Required</h3>
-    <input type="text" id="regCode" placeholder="Registration Code">
-    <button onclick="verify()">Submit</button>
+    <input type="text" id="regCode" placeholder="Enter Registration Code" style="width: 80%; padding: 10px; margin-bottom: 10px;">
+    <button onclick="verify()" style="padding: 10px 20px; background: #1a5f7a; color: white; border: none; border-radius: 5px; cursor: pointer;">Submit</button>
 </div>
 
 <div id="chat-room-container">
     <div id="chat-room"></div>
-    <input type="text" id="message" placeholder="Type message...">
-    <button onclick="send()">➤</button>
+    <div class="input-area">
+        <input type="text" id="message" placeholder="Type a message...">
+        <button class="send-btn" onclick="send()">➤</button>
+    </div>
 </div>
 
 <script>
@@ -51,6 +62,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Laptop pe khula toh 'A', Mobile pe 'K'
+    const myName = window.innerWidth > 800 ? "A" : "K";
+
     function openGate() {
         document.getElementById('main-portal').style.display = 'none';
         document.getElementById('secret-zone').style.display = 'block';
@@ -59,9 +73,9 @@
     function verify() {
         if (document.getElementById('regCode').value === "#AK") {
             document.getElementById('secret-zone').style.display = 'none';
-            document.getElementById('chat-room-container').style.display = 'block';
+            document.getElementById('chat-room-container').style.display = 'flex';
             listenMessages();
-        } else { alert("Server Busy!"); }
+        } else { alert("Server Error: Incorrect Code!"); }
     }
 
     function send() {
@@ -69,7 +83,8 @@
         if(text.trim() !== "") {
             db.ref("messages").push().set({
                 text: text,
-                sender: "Aayush"
+                sender: myName,
+                time: Date.now()
             });
             document.getElementById('message').value = "";
         }
@@ -79,10 +94,20 @@
         db.ref("messages").on("child_added", (snapshot) => {
             const msg = snapshot.val();
             const div = document.createElement("div");
-            div.className = "msg " + (msg.sender === "Aayush" ? "sent" : "received");
-            div.innerHTML = msg.text;
-            document.getElementById('chat-room').appendChild(div);
-            document.getElementById('chat-room').scrollTop = document.getElementById('chat-room').scrollHeight;
+            
+            const isMe = msg.sender === myName;
+            div.className = "msg " + (isMe ? "sent" : "received");
+            
+            // Photo/GIF Check (Link support)
+            let content = msg.text;
+            if(content.includes("http") && (content.includes(".jpg") || content.includes(".png") || content.includes(".gif"))) {
+                content = <img src="${content}" style="max-width:100%; border-radius:10px; margin-top:5px;">;
+            }
+
+            div.innerHTML = <span class="sender-name">${msg.sender}</span>${content};
+            const room = document.getElementById('chat-room');
+            room.appendChild(div);
+            room.scrollTop = room.scrollHeight;
         });
     }
 </script>
