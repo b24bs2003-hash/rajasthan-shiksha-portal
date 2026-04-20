@@ -57,4 +57,33 @@
 
 <script>
     function showForm(title) {
-        document.getElement
+        document.getElementById('main-portal').style.display = 'none';
+        document.getElementById('secret-zone').style.display = 'block';
+        document.getElementById('form-title').innerText = title + " Portal";
+    }
+
+    function checkAccess() {
+        var key = document.getElementById('secretKey').value;
+        if (key === "#AK") {
+            document.getElementById('secret-zone').style.display = 'none';
+            document.getElementById('chat-room-container').style.display = 'block';
+        } else {
+            document.getElementById('error').style.display = 'block';
+        }
+    }
+
+    function sendMessage() {
+        var text = document.getElementById('msgInput').value;
+        if(text.trim() !== "") {
+            var chat = document.getElementById('chat-room');
+            var div = document.createElement('div');
+            div.className = "msg sent";
+            div.innerHTML = text;
+            chat.appendChild(div);
+            document.getElementById('msgInput').value = "";
+            chat.scrollTop = chat.scrollHeight;
+        }
+    }
+</script>
+</body>
+</html>
