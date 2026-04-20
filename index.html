@@ -6,21 +6,42 @@
     <title>Rajasthan Shiksha Portal</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #e6ebee; margin:0; padding:10px; text-align: center; }
-        .container { max-width: 400px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .container { 
+            max-width: 400px; 
+            margin: 20px auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
         
-        #login-section, #chat-section { display: none; }
+        /* Hide sections initially */
+        #login-section, #chat-section { display: none; visibility: hidden; }
 
         .header { background: #1a5f7a; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .portal-btn { width: 100%; padding: 20px; margin: 10px 0; font-weight: bold; background: white; border: 2px solid #1a5f7a; border-radius: 10px; cursor: pointer; font-size: 16px; }
         
-        /* Chat Style */
+        .portal-btn { 
+            width: 100%; 
+            padding: 20px; 
+            margin: 10px 0; 
+            font-weight: bold; 
+            background: #f8f9fa; 
+            border: 2px solid #1a5f7a; 
+            border-radius: 10px; 
+            cursor: pointer !important; 
+            font-size: 16px;
+            display: block;
+            pointer-events: auto !important;
+        }
+
         #chat-box { height: 400px; overflow-y: auto; background: #d1d7db; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; margin-bottom: 10px; }
-        .msg { padding: 10px; border-radius: 10px; margin-bottom: 8px; max-width: 80%; font-size: 15px; word-wrap: break-word; }
-        .sent { background: #efffde; align-self: flex-end; text-align: right; }
-        .received { background: #ffffff; align-self: flex-start; text-align: left; }
+        .msg { padding: 10px; border-radius: 10px; margin-bottom: 8px; max-width: 80%; font-size: 15px; }
+        .sent { background: #efffde; align-self: flex-end; }
+        .received { background: #ffffff; align-self: flex-start; }
         
         .input-area { display: flex; gap: 5px; }
         #msg-input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ccc; outline: none; }
@@ -29,67 +50,62 @@
 </head>
 <body>
 
-<div id="portal-section" class="container">
+<div id="portal-section" class="container" style="display: block;">
     <div class="header"><h3>राजस्थान शिक्षा पोर्टल</h3><p>सत्र 2024-25</p></div>
     <button class="portal-btn" onclick="showLogin()">SSC / Rajasthan Police</button>
     <button class="portal-btn" onclick="showLogin()">NEET / JEE Medical</button>
-    <button class="portal-btn" onclick="showLogin()">Arts / Humanities</button>
+    <button class="portal-btn" onclick="showLogin()">Arts Notes</button>
+    <button class="portal-btn" onclick="showLogin()">Agriculture</button>
 </div>
 
 <div id="login-section" class="container">
     <h3>Verification Required</h3>
-    <input type="text" id="access-code" placeholder="Enter Registration Code" style="width: 80%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px;">
+    <input type="text" id="access-code" placeholder="Enter Registration Code" style="width: 80%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc;">
     <button class="portal-btn" style="background: #1a5f7a; color: white;" onclick="checkAccess()">Login</button>
 </div>
 
-<div id="chat-section" class="container" style="max-width: 500px; height: 90vh;">
+<div id="chat-section" class="container" style="height: 85vh;">
     <div id="chat-box"></div>
     <div class="input-area">
         <input type="text" id="msg-input" placeholder="Type message...">
         <button class="send-btn" onclick="sendMsg()">➤</button>
     </div>
 </div>
+
 <script>
-    // Firebase Config
     const firebaseConfig = { databaseURL: "https://puku-chats-1-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // A for Laptop, K for Mobile
     const userTag = window.innerWidth > 800 ? "A" : "K";
 
-    // Step 1: Go to Login
     function showLogin() {
+        console.log("Button clicked!");
         document.getElementById('portal-section').style.display = 'none';
         document.getElementById('login-section').style.display = 'block';
+        document.getElementById('login-section').style.visibility = 'visible';
     }
 
-    // Step 2: Check #AK Code
     function checkAccess() {
         const code = document.getElementById('access-code').value;
         if(code === "#AK") {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('chat-section').style.display = 'block';
+            document.getElementById('chat-section').style.visibility = 'visible';
             loadChats();
         } else {
-            alert("Galat Code! Kripya sahi code dale.");
+            alert("Galat Code!");
         }
     }
 
-    // Step 3: Send
     function sendMsg() {
         const text = document.getElementById('msg-input').value;
         if(text.trim() !== "") {
-            db.ref("messages").push().set({
-                sender: userTag,
-                text: text,
-                time: Date.now()
-            });
+            db.ref("messages").push().set({ sender: userTag, text: text, time: Date.now() });
             document.getElementById('msg-input').value = "";
         }
     }
 
-    // Step 4: Load
     function loadChats() {
         db.ref("messages").on("child_added", (snap) => {
             const data = snap.val();
@@ -101,6 +117,5 @@
         });
     }
 </script>
-
 </body>
 </html>
