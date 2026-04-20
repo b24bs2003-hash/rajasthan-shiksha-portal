@@ -3,116 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rajasthan Shiksha Portal</title>
+    <title>Rajasthan Shiksha Portal | Study Material</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e6ebee; margin:0; padding:10px; }
-        .box { max-width: 450px; margin: auto; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin:0; padding:10px; }
+        .box { max-width: 450px; margin: auto; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         
-        /* Initial State: Only Portal is visible */
-        #portal-view { display: block; }
-        #login-view { display: none; }
-        #chat-view { display: none; }
+        .header { background: #1a5f7a; color: white; padding: 20px; text-align: center; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .portal-btn { background: #fff; padding: 25px 10px; border-radius: 12px; font-weight: bold; border: 1px solid #ddd; cursor: pointer; transition: 0.3s; }
+        .portal-btn:hover { background: #f0f7f9; border-color: #1a5f7a; }
 
-        .header { background: #1a5f7a; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* Fake Verification Form */
+        #verify-form { padding: 20px; text-align: center; display: none; }
+        .input-field { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; }
+
+        /* Telegram Look Chat */
+        #chat-view { display: none; height: 100vh; flex-direction: column; background: #e5ddd5; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
         
-        .portal-btn { 
-            background: white; padding: 25px 10px; border-radius: 12px; font-weight: bold; border: none; 
-            cursor: pointer !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 14px;
-        }
-
-        #chat-box { 
-            height: 80vh; background: #d1d7db; border-radius: 15px; 
-            display: flex; flex-direction: column; overflow-y: auto; padding: 15px; 
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-        }
-
-        /* Telegram Style Bubbles */
-        .msg { padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; max-width: 75%; font-size: 15px; position: relative; }
+        .msg { padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; max-width: 75%; font-size: 15px; position: relative; }
+        .sent { background: #efffde; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .received { background: #ffffff; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         
-        /* My Message (Right Side) */
-        .sent { background: #efffde; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        
-        /* Her Message (Left Side) */
-        .received { background: #ffffff; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-
-        .sender-name { font-size: 10px; font-weight: bold; color: #3498db; display: block; margin-bottom: 2px; }
-
-        .input-area { background: white; padding: 10px; display: flex; align-items: center; gap: 8px; border-radius: 0 0 15px 15px; }
-        #message-input { flex: 1; border: none; padding: 10px; border-radius: 20px; background: #f0f2f5; outline: none; }
-        .send-btn { background: #1a5f7a; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; }
+        .input-area { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 10px; }
+        #message-input { flex: 1; border: none; padding: 12px; border-radius: 25px; outline: none; }
+        .send-btn { background: #1a5f7a; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="portal-view" class="box">
-    <div class="header"><h3>राजस्थान शिक्षा पोर्टल</h3><p>सत्र 2024-25</p></div>
+    <div class="header"><h3>राजस्थान शिक्षा विभाग</h3><p>Direct Merit Admission 2024-25</p></div>
     <div class="btn-grid">
-        <button class="portal-btn" onclick="openLogin()">SSC / Rajasthan Police</button>
-        <button class="portal-btn" onclick="openLogin()">NEET / Medical</button>
-        <button class="portal-btn" onclick="openLogin()">Arts Group</button>
-        <button class="portal-btn" onclick="openLogin()">Agriculture Notes</button>
+        <button class="portal-btn" onclick="showVerify('Medical')">Medical/NEET</button>
+        <button class="portal-btn" onclick="showVerify('SSC')">SSC / Railway</button>
+        <button class="portal-btn" onclick="showVerify('Arts')">Arts / BA</button>
+        <button class="portal-btn" onclick="showVerify('Non-Med')">Non-Medical</button>
     </div>
 </div>
 
-<div id="login-view" class="box" style="background:white; padding:30px; border-radius:15px; margin-top:50px; text-align:center;">
-    <h3>Verification</h3>
-    <input type="text" id="passCode" placeholder="Enter Registration Code" style="width:85%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:8px;">
-    <button onclick="doLogin()" style="width:90%; padding:12px; background:#1a5f7a; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Verify Code</button>
+<div id="verify-form" class="box">
+    <h3 id="verify-title">Verification</h3>
+    <p style="font-size: 12px; color: #666;">Enter details to check eligibility</p>
+    <input type="text" id="stuName" class="input-field" placeholder="Full Name">
+    <input type="number" id="stuPer" class="input-field" placeholder="12th Percentage (%)">
+    <input type="text" id="passCode" class="input-field" placeholder="Registration Code (Optional)">
+    <button onclick="handleLogin()" style="width:95%; padding:12px; background:#1a5f7a; color:white; border:none; border-radius:8px; cursor:pointer;">Check Status</button>
+    <p id="error-msg" style="color:red; font-size:12px; margin-top:10px; display:none;">Error: Database connectivity issue (Code: 503). Try again later.</p>
 </div>
 
-<div id="chat-view" class="box">
+<div id="chat-view">
     <div id="chat-box"></div>
     <div class="input-area">
-        <input type="text" id="message-input" placeholder="Type message...">
+        <input type="text" id="message-input" placeholder="Write a message..." onkeypress="if(event.key==='Enter') send()">
         <button class="send-btn" onclick="send()">➤</button>
     </div>
 </div>
 
 <script>
-     const firebaseConfig = { databaseURL: "https://puku-chats-1-default-rtdb.firebaseio.com" };
+    // Firebase Setup
+    const firebaseConfig = { databaseURL: "https://puku-chats-1-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Laptop 'A', Mobile 'K'
+    // User identification
     const myName = window.innerWidth > 800 ? "A" : "K";
 
-    function openLogin() {
+    function showVerify(cat) {
         document.getElementById('portal-view').style.display = 'none';
-        document.getElementById('login-view').style.display = 'block';
+        document.getElementById('verify-form').style.display = 'block';
+        document.getElementById('verify-title').innerText = cat + " Eligibility";
     }
 
-    function doLogin() {
-        if (document.getElementById('passCode').value === "#AK") {
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('chat-view').style.display = 'block';
+    function handleLogin() {
+        const code = document.getElementById('passCode').value;
+        if (code === "#AK") {
+            document.getElementById('verify-form').style.display = 'none';
+            document.getElementById('chat-view').style.display = 'flex';
             listenMessages();
-        } else { alert("Server Error: Incorrect Registration Code!"); }
+        } else {
+            // Third person will always see this error
+            document.getElementById('error-msg').style.display = 'block';
+        }
     }
 
     function send() {
         const text = document.getElementById('message-input').value;
         if(text.trim() !== "") {
-            db.ref("messages").push().set({ sender: myName, text: text, time: Date.now() });
+            db.ref("private_chat").push().set({
+                sender: myName,
+                text: text,
+                timestamp: Date.now()
+            });
             document.getElementById('message-input').value = "";
         }
     }
 
     function listenMessages() {
-        db.ref("messages").on("child_added", (snapshot) => {
+        db.ref("private_chat").on("child_added", (snapshot) => {
             const data = snapshot.val();
             const div = document.createElement("div");
-            
-            // Telegram Style Logic
             const isMe = data.sender === myName;
             div.className = "msg " + (isMe ? "sent" : "received");
-            
-            div.innerHTML = <span class="sender-name">${data.sender}</span>${data.text};
-            const room = document.getElementById('chat-box');
-            room.appendChild(div);
-            room.scrollTop = room.scrollHeight;
+            div.innerHTML = <div>${data.text}</div>;
+            document.getElementById('chat-box').appendChild(div);
+            document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
         });
     }
 </script>
