@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rajasthan Education Portal - Exam Notes</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; text-align: center; color: #333; }
+        .header { background: #1a5f7a; color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 450px; margin: auto; }
+        .btn { background: white; padding: 25px 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; font-weight: 600; border: 2px solid transparent; transition: 0.3s; color: #1a5f7a; }
+        .btn:hover { border-color: #1a5f7a; transform: translateY(-3px); }
+        #secret-zone { display: none; background: white; padding: 30px; border-radius: 15px; max-width: 400px; margin: 20px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 12px; margin: 12px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { width: 95%; padding: 12px; background: #1a5f7a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        #chat-room-container { display: none; max-width: 500px; margin: auto; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); overflow: hidden; }
+        #chat-room { height: 450px; overflow-y: auto; padding: 15px; background: #e5ddd5; display: flex; flex-direction: column; }
+        .msg { padding: 10px 15px; border-radius: 10px; margin-bottom: 8px; font-size: 15px; line-height: 1.4; max-width: 85%; word-wrap: break-word; }
+        .msg.system { background: #fff3cd; align-self: center; font-size: 12px; color: #856404; text-align: center; width: 90%; }
+        .msg.sent { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.received { background: white; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .error-msg { color: #dc3545; display: none; margin-top: 10px; font-weight: 500; }
+        .chat-input-area { padding: 10px; background: #f0f0f0; display: flex; gap: 8px; }
+    </style>
+</head>
+<body>
+
+<div id="main-portal">
+    <div class="header"><h2>राजस्थान शिक्षा एवं भर्ती पोर्टल</h2><p>सत्र 2024-25</p></div>
+    <div class="btn-grid">
+        <div class="btn" onclick="showForm('SSC/Police')">SSC / Rajasthan Police</div>
+        <div class="btn" onclick="showForm('Medical/NEET')">Medical / NEET</div>
+        <div class="btn" onclick="showForm('Arts/Humanities')">Arts Group</div>
+        <div class="btn" onclick="showForm('Agriculture')">Agriculture Notes</div>
+    </div>
+    <p style="margin-top:30px; font-size:12px; color:#777;">&copy; Govt Education Board Rajasthan</p>
+</div>
+
+<div id="secret-zone">
+    <h3 id="form-title">Verification</h3>
+    <input type="text" placeholder="Roll Number (12th/UG)">
+    <input type="text" id="secretKey" placeholder="Registration Code (Mandatory)">
+    <button onclick="checkAccess()">Access Study Material</button>
+    <p id="error" class="error-msg">Error 503: Connection to state server failed. Please contact administrator.</p>
+</div>
+
+<div id="chat-room-container">
+    <div style="background:#1a5f7a; color:white; padding:15px; text-align:left;"><b>Private Vault</b> <span style="float:right; font-size:12px;">Secure Line</span></div>
+    <div id="chat-room">
+        <div class="msg system">This session is temporary. Chats are not saved on the public server.</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="msgInput" placeholder="Write safely..." style="margin:0; width:75%;">
+        <button onclick="sendMessage()" style="width:20%; padding:5px;">➤</button>
+    </div>
+</div>
+
+<script>
+    function showForm(title) {
+        document.getElement
