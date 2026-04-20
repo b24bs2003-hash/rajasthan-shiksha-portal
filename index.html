@@ -1,47 +1,54 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rajasthan Shiksha Portal</title>
+    <title>Rajasthan Portal</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #e6ebee; margin:0; padding:10px; text-align: center; }
-        .box { max-width: 400px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        #login-view, #chat-view { display: none; }
-        .header { background: #1a5f7a; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .p-btn { width: 100%; padding: 20px; margin: 10px 0; font-weight: bold; background: white; border: 2px solid #1a5f7a; border-radius: 10px; cursor: pointer; }
-        #chat-box { height: 75vh; background: #d1d7db; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; }
-        .msg { padding: 10px; border-radius: 10px; margin-bottom: 8px; max-width: 75%; font-size: 15px; }
-        .sent { background: #efffde; align-self: flex-end; }
-        .received { background: #ffffff; align-self: flex-start; }
-        .input-area { display: flex; gap: 5px; margin-top: 10px; }
-        #m-input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ccc; outline: none; }
-        .s-btn { background: #1a5f7a; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+        body { font-family: sans-serif; background: #e6ebee; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        
+        /* Hide sections by default */
+        #login-section, #chat-section { display: none; }
+
+        .btn { 
+            width: 100%; padding: 15px; margin: 10px 0; 
+            background: #1a5f7a; color: white; border: none; 
+            border-radius: 5px; font-weight: bold; cursor: pointer;
+            font-size: 16px;
+        }
+
+        #chat-box { height: 350px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ddd; margin-bottom: 10px; padding: 10px; display: flex; flex-direction: column; }
+        .msg { padding: 8px; margin: 5px; border-radius: 5px; max-width: 70%; word-wrap: break-word; }
+        .sent { background: #dcf8c6; align-self: flex-end; } /* Aapka (Laptop) */
+        .received { background: #fff; border: 1px solid #ccc; align-self: flex-start; } /* Uska (Mobile) */
+
+        .input-area { display: flex; gap: 5px; }
+        #message-input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div id="portal-view" class="box">
-    <div class="header"><h3>राजस्थान शिक्षा पोर्टल</h3><p>सत्र 2024-25</p></div>
-    <button class="p-btn" onclick="goLog()">SSC / Rajasthan Police</button>
-    <button class="p-btn" onclick="goLog()">NEET / JEE Medical</button>
-    <button class="p-btn" onclick="goLog()">Arts / Humanities</button>
+<div id="portal-section" class="container">
+    <h2 style="background:#1a5f7a; color:white; padding:10px; border-radius:5px;">राजस्थान पोर्टल</h2>
+    <button class="btn" onclick="goToLogin()">SSC / Rajasthan Police</button>
+    <button class="btn" onclick="goToLogin()">Medical / NEET</button>
+    <button class="btn" onclick="goToLogin()">Arts / Agriculture</button>
 </div>
 
-<div id="login-view" class="box">
-    <h3>Student Verification</h3>
-    <p style="font-size: 12px; color: #666;">Enter your Roll Number to access notes</p>
-    <input type="text" id="rollNo" placeholder="Enter Roll No." style="width: 85%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px;">
-    <button class="p-btn" style="background: #1a5f7a; color: white;" onclick="validate()">LOGIN</button>
+<div id="login-section" class="container">
+    <h3>Enter PERCENTAGE </h3>
+    <input type="text" id="passCode" placeholder="Code..." style="width:80%; padding:10px; margin-bottom:10px;">
+    <button class="btn" onclick="checkCode()">Verify & Login</button>
 </div>
 
-<div id="chat-view" class="box" style="max-width: 500px;">
+<div id="chat-section" class="container">
     <div id="chat-box"></div>
     <div class="input-area">
-        <input type="text" id="m-input" placeholder="Type message...">
-        <button class="s-btn" onclick="send()">➤</button>
+        <input type="text" id="message-input" placeholder="Type here...">
+        <button onclick="sendMsg()" style="padding:10px; background:#1a5f7a; color:white; border:none; border-radius:5px;">Send</button>
     </div>
 </div>
 
@@ -49,39 +56,36 @@
     const firebaseConfig = { databaseURL: "https://puku-chats-1-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const uTag = window.innerWidth > 800 ? "A" : "K";
 
-    function goLog() {
-        document.getElementById('portal-view').style.display = 'none';
-        document.getElementById('login-view').style.display = 'block';
+    const myTag = window.innerWidth > 800 ? "A" : "K";
+
+    function goToLogin() {
+        document.getElementById('portal-section').style.display = 'none';
+        document.getElementById('login-section').style.display = 'block';
     }
 
-    function validate() {
-        const val = document.getElementById('rollNo').value;
-        // Secret Logic: Only #AK opens the chat
-        if(val === "#AK") {
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('chat-view').style.display = 'block';
-            load();
-        } else {
-            alert("Error 404: Student Roll Number not found in 2024-25 database.");
+    function checkCode() {
+        if(document.getElementById('passCode').value === "#AK") {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('chat-section').style.display = 'block';
+            startChat();
+        } else { alert("Wrong Code!"); }
+    }
+
+    function sendMsg() {
+        const val = document.getElementById('message-input').value;
+        if(val.trim()) {
+            db.ref("messages").push().set({ sender: myTag, text: val });
+            document.getElementById('message-input').value = "";
         }
     }
 
-    function send() {
-        const t = document.getElementById('m-input').value;
-        if(t.trim() !== "") {
-            db.ref("messages").push().set({ s: uTag, m: t, time: Date.now() });
-            document.getElementById('m-input').value = "";
-        }
-    }
-
-    function load() {
+    function startChat() {
         db.ref("messages").on("child_added", (snap) => {
-            const d = snap.val();
+            const data = snap.val();
             const div = document.createElement("div");
-            div.className = "msg " + (d.s === uTag ? "sent" : "received");
-            div.innerHTML = <b>${d.s}:</b> ${d.m};
+            div.className = "msg " + (data.sender === myTag ? "sent" : "received");
+            div.innerHTML = "<b>" + data.sender + ":</b> " + data.text;
             document.getElementById('chat-box').appendChild(div);
             document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
         });
