@@ -57,54 +57,35 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Ab hum manually decide karenge
-    let uTag = ""; 
+    const myTag = window.innerWidth > 800 ? "A" : "K";
 
-    function goLog() {
-        document.getElementById('portal-view').style.display = 'none';
-        document.getElementById('login-view').style.display = 'block';
+    function goToLogin() {
+        document.getElementById('portal-section').style.display = 'none';
+        document.getElementById('login-section').style.display = 'block';
     }
 
-    function validate() {
-        const val = document.getElementById('rollNo').value;
-        
-        // Agar tum #AK bharoge to tum "A" (Admin/Sachin)
-        if(val === "#AK") {
-            uTag = "A";
-            startSystem();
-        } 
-        // Agar wo #KA bharegi to wo "K" (Puku)
-        else if(val === "#KA") {
-            uTag = "K";
-            startSystem();
-        }
-        else {
-            alert("Error: Student Record Not Found.");
+    function checkCode() {
+        if(document.getElementById('passCode').value === "#AK") {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('chat-section').style.display = 'block';
+            startChat();
+        } else { alert("Wrong Code!"); }
+    }
+
+    function sendMsg() {
+        const val = document.getElementById('message-input').value;
+        if(val.trim()) {
+            db.ref("messages").push().set({ sender: myTag, text: val });
+            document.getElementById('message-input').value = "";
         }
     }
 
-    function startSystem() {
-        document.getElementById('login-view').style.display = 'none';
-        document.getElementById('chat-view').style.display = 'block';
-        load();
-    }
-
-    function send() {
-        const t = document.getElementById('m-input').value;
-        if(t.trim() !== "") {
-            db.ref("messages").push().set({ s: uTag, m: t, time: Date.now() });
-            document.getElementById('m-input').value = "";
-        }
-    }
-
-    function load() {
+    function startChat() {
         db.ref("messages").on("child_added", (snap) => {
-            const d = snap.val();
+            const data = snap.val();
             const div = document.createElement("div");
-            // Telegram Look: Tera message right, uska left
-            const isMe = d.s === uTag;
-            div.className = "msg " + (isMe ? "sent" : "received");
-            div.innerHTML = <b>${d.s}:</b> ${d.m};
+            div.className = "msg " + (data.sender === myTag ? "sent" : "received");
+            div.innerHTML = "<b>" + data.sender + ":</b> " + data.text;
             document.getElementById('chat-box').appendChild(div);
             document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
         });
