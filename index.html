@@ -10,15 +10,26 @@
         body { font-family: 'Segoe UI', sans-serif; background: #e6ebee; margin:0; padding:10px; }
         #main-portal, #secret-zone, #chat-room-container { max-width: 450px; margin: auto; }
         
-        /* Buttons are visible first */
+        /* Initial States */
         #main-portal { display: block; }
-        /* These are hidden by default */
         #secret-zone, #chat-room-container { display: none; }
 
         .header { background: #1a5f7a; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .btn { background: white; padding: 25px 10px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
+        .btn { 
+            background: white; 
+            padding: 25px 10px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            border: none; 
+            cursor: pointer !important; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            pointer-events: auto !important;
+            display: block;
+            width: 100%;
+        }
+
         #chat-room-container { background: #7195b1; height: 90vh; border-radius: 15px; flex-direction: column; overflow: hidden; }
         #chat-room { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
         
@@ -29,7 +40,7 @@
         
         .input-area { background: white; padding: 10px; display: flex; gap: 8px; }
         input[type="text"] { flex: 1; border: none; padding: 10px; border-radius: 20px; background: #f0f2f5; outline: none; }
-        .send-btn { background: #1a5f7a; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .send-btn { background: #1a5f7a; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; }
         
         #secret-zone { background: white; padding: 30px; border-radius: 15px; text-align: center; margin-top: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     </style>
@@ -39,18 +50,19 @@
 <div id="main-portal">
     <div class="header"><h3>राजस्थान शिक्षा पोर्टल</h3><p>सत्र 2024-25</p></div>
     <div class="btn-grid">
-        <div class="btn" onclick="openGate()">SSC / Police</div>
-        <div class="btn" onclick="openGate()">NEET / JEE</div>
-        <div class="btn" onclick="openGate()">Arts Notes</div>
-        <div class="btn" onclick="openGate()">Agriculture</div>
+        <button class="btn" onclick="openGate()">SSC / Police</button>
+        <button class="btn" onclick="openGate()">NEET / JEE</button>
+        <button class="btn" onclick="openGate()">Arts Notes</button>
+        <button class="btn" onclick="openGate()">Agriculture</button>
     </div>
 </div>
 
 <div id="secret-zone">
-    <h3>Verification</h3>
-    <input type="text" id="regCode" placeholder="Registration Code" style="width: 85%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px;">
+    <h3>Verification Required</h3>
+    <p style="font-size: 12px; color: gray;">Enter Registration Code to continue</p>
+    <input type="text" id="regCode" placeholder="Code..." style="width: 80%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px;">
     <br>
-    <button onclick="verify()" style="width: 90%; padding: 12px; background: #1a5f7a; color: white; border: none; border-radius: 8px; font-weight: bold;">Login</button>
+    <button onclick="verify()" style="width: 85%; padding: 12px; background: #1a5f7a; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Login</button>
 </div>
 
 <div id="chat-room-container">
@@ -62,11 +74,12 @@
 </div>
 
 <script>
+    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://puku-chats-1-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Pehchan: Badi screen 'A', Choti screen 'K'
+    // Laptop (Badi screen) = A, Mobile (Choti screen) = K
     const myName = window.innerWidth > 800 ? "A" : "K";
 
     function openGate() {
@@ -76,11 +89,14 @@
 
     function verify() {
         const code = document.getElementById('regCode').value;
+        // YAHAN HAI #AK KA LOGIC
         if (code === "#AK") {
             document.getElementById('secret-zone').style.display = 'none';
             document.getElementById('chat-room-container').style.display = 'flex';
             listenMessages();
-        } else { alert("Invalid Code!"); }
+        } else { 
+            alert("Invalid Registration Code!"); 
+        }
     }
 
     function send() {
@@ -99,8 +115,10 @@
             div.className = "msg " + (isMe ? "sent" : "received");
             
             let content = msg.text;
+            // Emoji support automatically comes with text
+            // Photo/GIF Check (Direct link support)
             if(content.includes("http") && (content.includes(".jpg") || content.includes(".png") || content.includes(".gif"))) {
-                content = <img src="${content}" style="max-width:100%; border-radius:10px;">;
+                content = <img src="${content}" style="max-width:100%; border-radius:10px; margin-top:5px;">;
             }
 
             div.innerHTML = <span class="sender-tag">${msg.sender}</span>${content};
