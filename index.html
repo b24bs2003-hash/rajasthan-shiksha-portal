@@ -13,11 +13,11 @@
         .btn { background: white; padding: 25px 10px; border-radius: 10px; font-weight: bold; border: 1px solid #ddd; cursor: pointer; }
         #secret-zone, #chat-room-container { display: none; background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #chat-room { height: 350px; overflow-y: auto; background: #e5ddd5; padding: 10px; display: flex; flex-direction: column; border-radius: 10px; margin-bottom: 10px; text-align: left; }
-        .msg { padding: 8px 12px; border-radius: 10px; margin-bottom: 5px; max-width: 75%; font-size: 14px; word-wrap: break-word; position: relative; }
-        .sent { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 0; }
-        .received { background: white; align-self: flex-start; border-bottom-left-radius: 0; }
-        input { width: 75%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; }
-        button { background: #1a5f7a; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .msg { padding: 8px 12px; border-radius: 10px; margin-bottom: 5px; max-width: 75%; font-size: 14px; word-wrap: break-word; }
+        .sent { background: #dcf8c6; align-self: flex-end; }
+        .received { background: white; align-self: flex-start; }
+        input { width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #1a5f7a; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -34,21 +34,17 @@
 
 <div id="secret-zone">
     <h3>Verification Required</h3>
-    <input type="text" id="regCode" placeholder="Registration Code (Mandatory)">
+    <input type="text" id="regCode" placeholder="Registration Code">
     <button onclick="verify()">Submit</button>
 </div>
 
 <div id="chat-room-container">
-    <div style="background:#1a5f7a; color:white; padding:10px; border-radius:5px 5px 0 0; margin-bottom:10px;">Private Vault</div>
     <div id="chat-room"></div>
-    <div style="display:flex; gap:5px;">
-        <input type="text" id="message" placeholder="Type safely...">
-        <button onclick="send()">➤</button>
-    </div>
+    <input type="text" id="message" placeholder="Type message...">
+    <button onclick="send()">➤</button>
 </div>
 
 <script>
-    // ISME APNA DATABASE URL CHIPKAO
     const firebaseConfig = {
         databaseURL: "https://puku-chats-1-default-rtdb.firebaseio.com"
     };
@@ -65,7 +61,7 @@
             document.getElementById('secret-zone').style.display = 'none';
             document.getElementById('chat-room-container').style.display = 'block';
             listenMessages();
-        } else { alert("Connection Error: Try again later."); }
+        } else { alert("Server Busy!"); }
     }
 
     function send() {
@@ -73,8 +69,7 @@
         if(text.trim() !== "") {
             db.ref("messages").push().set({
                 text: text,
-                sender: "Aayush", 
-                timestamp: Date.now()
+                sender: "Aayush"
             });
             document.getElementById('message').value = "";
         }
@@ -83,3 +78,13 @@
     function listenMessages() {
         db.ref("messages").on("child_added", (snapshot) => {
             const msg = snapshot.val();
+            const div = document.createElement("div");
+            div.className = "msg " + (msg.sender === "Aayush" ? "sent" : "received");
+            div.innerHTML = msg.text;
+            document.getElementById('chat-room').appendChild(div);
+            document.getElementById('chat-room').scrollTop = document.getElementById('chat-room').scrollHeight;
+        });
+    }
+</script>
+</body>
+</html>
